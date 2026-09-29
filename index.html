@@ -64,6 +64,16 @@
   #works .work-card:nth-child(5) .work-photo img{object-position:center 65%;}
 }
 
+
+/* Gallery crop: focal point is set inline per real photo to avoid cascade conflicts */
+#works .work-photo{height:300px !important;aspect-ratio:auto !important;}
+#works .work-card--feature .work-photo{height:320px !important;}
+#works .work-photo img{width:100% !important;height:100% !important;object-fit:cover !important;}
+@media(max-width:640px){
+  #works .work-photo{height:300px !important;}
+  #works .work-card--feature .work-photo{height:240px !important;}
+}
+
 </style>
   <script type="application/ld+json">
   {
@@ -279,7 +289,7 @@
           <article class="work-card">
             <div class="work-photo work-photo--low">
               <img src="assets/cases/exeed-matte-protective-wrap-front.webp"
-                   alt="EXEED после защитной оклейки кузова матовой плёнкой"
+                   alt="EXEED после защитной оклейки кузова матовой плёнкой" style="object-position:center 76% !important"
                    loading="lazy" decoding="async">
             </div>
             <div class="work-card__meta"><div><b>EXEED</b><span>Матовый финиш кузова</span></div><small>результат</small></div>
@@ -288,7 +298,7 @@
           <article class="work-card">
             <div class="work-photo work-photo--low">
               <img src="assets/cases/tank-suv-matte-protective-wrap-front-angle.webp"
-                   alt="TANK SUV после защитной оклейки кузова матовой плёнкой"
+                   alt="TANK SUV после защитной оклейки кузова матовой плёнкой" style="object-position:center 74% !important"
                    loading="lazy" decoding="async">
             </div>
             <div class="work-card__meta"><div><b>TANK</b><span>Защитная оклейка кузова</span></div><small>результат</small></div>
@@ -297,7 +307,7 @@
           <article class="work-card">
             <div class="work-photo work-photo--mid">
               <img src="assets/cases/mercedes-protective-wrap-result-thumb.webp"
-                   alt="Mercedes-Benz после защитной оклейки кузова"
+                   alt="Mercedes-Benz после защитной оклейки кузова" style="object-position:center 69% !important"
                    loading="lazy" decoding="async">
             </div>
             <div class="work-card__meta"><div><b>Mercedes-Benz</b><span>Защитная оклейка кузова</span></div><small>результат</small></div>
@@ -306,7 +316,7 @@
           <article class="work-card">
             <div class="work-photo work-photo--mid">
               <img src="assets/cases/bmw-suv-gloss-protection-front-angle.webp"
-                   alt="BMW SUV после защитной оклейки кузова"
+                   alt="BMW SUV после защитной оклейки кузова" style="object-position:center 78% !important"
                    loading="lazy" decoding="async">
             </div>
             <div class="work-card__meta"><div><b>BMW SUV</b><span>Глянцевая защита кузова</span></div><small>готовый автомобиль</small></div>

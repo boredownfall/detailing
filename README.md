@@ -1,4 +1,4 @@
-# PPF Select — MVP лидген-сайта
+# BRONYA AUTO — лидген-сайт по защитной оклейке (PPF)
 
 Готовый статический лендинг для лидогенерации на защитную оклейку PPF в Москве.
 
@@ -15,31 +15,14 @@
 - базовые SEO meta, JSON-LD, robots.txt и sitemap.xml;
 - блоки под реальные фото.
 
-## 1. Что заменить перед публикацией
-1. `PPF Select` — временное название. Найдите все вхождения и замените на финальный бренд.
-2. В `index.html` замените `https://example.ru/` на ваш домен.
-3. В `robots.txt` и `sitemap.xml` тоже замените `example.ru`.
-4. Замените карточки «Добавить фото» реальными фотографиями.
-5. Заполните юридическую информацию в `privacy.html`.
+## 1. Что заполнить перед запуском
+
+1. `index.html` → блок `CONFIG` в начале скрипта: `telegramUrl`, `whatsappUrl` (пока пусты — ссылки в футере скрыты).
+2. `privacy.html` — подставить реквизиты оператора, e-mail, срок хранения (поля подсвечены жёлтым `.todo`).
+3. Домен в canonical / sitemap / robots уже `bronya-auto.ru`.
 
 ## 2. Подключение заявок
-Откройте `script.js` и заполните:
-
-```js
-const CONFIG = {
-  webhookUrl: "https://...",
-  telegramUrl: "https://t.me/...",
-  whatsappUrl: "https://wa.me/7..."
-};
-```
-
-### Самый простой сценарий
-Make.com:
-1. Custom Webhook;
-2. Telegram Bot → Send a message;
-3. Google Sheets → Add a row.
-
-В webhook прилетят: марка, модель, год, пакет, выбранные зоны, срок, контакты, UTM, referrer, URL и timestamp.
+Форма отправляет POST на `/api/lead` (см. раздел «Реальные заявки → Telegram» ниже). Webhook-вариант через Make.com больше не нужен.
 
 ## 3. Публикация бесплатно
 ### Cloudflare Pages
@@ -65,14 +48,14 @@ Make.com:
 После появления данных расширяйте структуру `/cars/brand/model`.
 
 ## 5. Аналитика
-В `script.js` уже заложены события:
+Цели Яндекс Метрики (JS-событие, нужно создать в интерфейсе Метрики):
 - calculator_started
 - car_brand_selected
 - protection_package_selected
 - calculator_step_completed
-- lead_submitted
+- lead_success  _(основная цель)_
 
-Для Яндекс Метрики достаточно подключить счётчик и задать `window.YM_COUNTER_ID`.
+Счётчик Метрики (`113135482`) уже подключён во всех страницах.
 
 
 ## Реальные заявки → Telegram
@@ -82,6 +65,8 @@ Make.com:
 - `TELEGRAM_BOT_TOKEN` — токен бота. Добавь его вручную в Vercel; в коде токена нет.
 - `TELEGRAM_CHAT_ID` — `683525048`.
 - `GOOGLE_SHEETS_WEBHOOK` — необязательно, URL Web App из `google-apps-script.gs`.
+- `GOOGLE_SHEETS_SECRET` — необязательно, общий секрет (тот же, что `SECRET` в Apps Script).
+- `ALLOWED_ORIGINS` — необязательно, список доменов через запятую, если форма вызывается не с домена самого сайта.
 
 В Vercel открой **Project → Settings → Environment Variables** и добавь:
 
@@ -94,7 +79,7 @@ TELEGRAM_CHAT_ID = 683525048
 
 Важно: токен бота хранится только в server-side Environment Variables. Не вставляй его в `index.html`, JavaScript браузера или публичный GitHub.
 
-После заполнения формы посетитель получает success-state только если Telegram API подтвердил отправку сообщения.
+Посетитель видит success-state, только если заявка дошла хотя бы в один канал (Telegram или Google Sheets). Сервер проверяет согласие, телефон/Telegram, Origin и ограничивает частоту запросов.
 
 ### Как получить TELEGRAM_CHAT_ID
 
@@ -104,3 +89,7 @@ TELEGRAM_CHAT_ID = 683525048
 ### Google Sheets
 
 Файл `google-apps-script.gs` — готовый receiver. Вставь его в Apps Script, задеплой как Web App и добавь URL в `GOOGLE_SHEETS_WEBHOOK`. Telegram при этом остаётся основным каналом, поэтому сбой таблицы не теряет лид.
+
+## Ссылки с предзаполнением квиза
+
+Кнопки на подстраницах ведут на `/?brand=BMW&model=X5#calculator` или `/?package=Зоны%20риска#calculator` — квиз открывается сразу на нужном шаге. UTM/yclid/gclid сохраняются в `sessionStorage` на любой странице, поэтому источник не теряется при переходе «SEO-страница → главная».

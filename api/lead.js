@@ -1,15 +1,46 @@
-function escapeHtml(value = '') {
-  return String(value)
+// POST /api/lead — принимает заявку с квиза, отправляет в Telegram и (опционально) в Google Sheets.
+// Env: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, GOOGLE_SHEETS_WEBHOOK (опц.), GOOGLE_SHEETS_SECRET (опц.),
+//      ALLOWED_ORIGINS (опц., через запятую: https://bronya-auto.ru,https://www.bronya-auto.ru)
+
+const escapeHtml = (value = '') =>
+  String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+
+const clean = (value, max = 300) =>
+  String(value ?? '')
+    .replace(/[\u0000-\u001f\u007f]+/g, ' ')
+    .trim()
+    .slice(0, max);
+
+// Мягкий rate-limit: работает в пределах одного «тёплого» инстанса, но гасит всплески от ботов.
+const hits = new Map();
+const WINDOW_MS = 10 * 60 * 1000;
+const MAX_HITS = 5;
+function rateLimited(ip) {
+  const now = Date.now();
+  const list = (hits.get(ip) || []).filter(t => now - t < WINDOW_MS);
+  list.push(now);
+  hits.set(ip, list);
+  if (hits.size > 500) for (const [k, v] of hits) if (!v.some(t => now - t < WINDOW_MS)) hits.delete(k);
+  return list.length > MAX_HITS;
 }
 
-function clean(value, max = 300) {
-  return String(value ?? '').trim().slice(0, max);
+function originAllowed(req) {
+  const origin = req.headers.origin;
+  if (!origin) return true; // не-браузерные клиенты / same-origin GET-навигация
+  let host;
+  try { host = new URL(origin).host; } catch { return false; }
+  const extra = (process.env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (host === req.headers.host) return true;
+  return extra.some(o => { try { return new URL(o).host === host; } catch { return false; } });
 }
+
+const withTimeout = (url, options, ms) =>
+  fetch(url, { ...options, signal: AbortSignal.timeout(ms) });
 
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
@@ -19,12 +50,18 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
-  const body = req.body || {};
+  if (!originAllowed(req)) return res.status(403).json({ ok: false, error: 'Forbidden' });
 
-  // Honeypot: bots often fill hidden fields.
-  if (clean(body.website)) {
-    return res.status(200).json({ ok: true });
+  const ip = String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '').split(',')[0].trim();
+  if (rateLimited(ip)) return res.status(429).json({ ok: false, error: 'Too many requests' });
+
+  let body = req.body || {};
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch { return res.status(400).json({ ok: false, error: 'Bad JSON' }); }
   }
+
+  // Honeypot: боты заполняют скрытое поле.
+  if (clean(body.website)) return res.status(200).json({ ok: true });
 
   const lead = {
     brand: clean(body.brand, 80),
@@ -34,7 +71,7 @@ module.exports = async function handler(req, res) {
     zones: Array.isArray(body.zones) ? body.zones.map(v => clean(v, 80)).slice(0, 20) : [],
     timeline: clean(body.timeline, 100),
     name: clean(body.name, 100),
-    phone: clean(body.phone, 80),
+    phone: clean(body.phone, 40),
     telegram: clean(body.telegram, 100),
     utm_source: clean(body.utm_source, 120),
     utm_medium: clean(body.utm_medium, 120),
@@ -43,18 +80,32 @@ module.exports = async function handler(req, res) {
     utm_term: clean(body.utm_term, 160),
     referrer: clean(body.referrer, 500),
     landing_page: clean(body.landing_page, 500),
-    timestamp: clean(body.timestamp, 80) || new Date().toISOString(),
+    timestamp: new Date().toISOString(), // время фиксируем на сервере, а не доверяем клиенту
   };
 
-  if (!lead.brand || !lead.model || !lead.package || !lead.timeline || (!lead.phone && !lead.telegram)) {
+  if (!lead.brand || !lead.model || !lead.package || !lead.timeline) {
     return res.status(400).json({ ok: false, error: 'Missing required lead fields' });
   }
+  if (clean(body.consent, 10) !== 'yes') {
+    return res.status(400).json({ ok: false, error: 'Consent is required' });
+  }
+
+  const digits = lead.phone.replace(/\D/g, '');
+  const phoneOk = digits.length >= 10 && digits.length <= 15;
+  const tgHandle = lead.telegram.replace(/^https?:\/\/t\.me\//i, '').replace(/^@/, '');
+  const tgOk = /^[A-Za-z0-9_]{4,32}$/.test(tgHandle);
+
+  if (lead.phone && !phoneOk) return res.status(400).json({ ok: false, error: 'Invalid phone' });
+  if (lead.telegram && !tgOk) return res.status(400).json({ ok: false, error: 'Invalid telegram' });
+  if (!lead.phone && !lead.telegram) return res.status(400).json({ ok: false, error: 'Contact is required' });
+  if (lead.telegram) lead.telegram = '@' + tgHandle;
 
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
+  const sheetsWebhook = process.env.GOOGLE_SHEETS_WEBHOOK;
 
-  if (!token || !chatId) {
-    console.error('Telegram env vars are not configured');
+  if ((!token || !chatId) && !sheetsWebhook) {
+    console.error('Lead delivery is not configured');
     return res.status(500).json({ ok: false, error: 'Lead delivery is not configured' });
   }
 
@@ -63,7 +114,7 @@ module.exports = async function handler(req, res) {
   const zones = lead.zones.length ? lead.zones.join(', ') : '—';
 
   const message = [
-    '<b>🔥 Новый лид — PPF</b>',
+    '<b>🔥 Новый лид — BRONYA AUTO</b>',
     '',
     `🚘 <b>Авто:</b> ${escapeHtml(car)}`,
     `🛡 <b>Защита:</b> ${escapeHtml(lead.package)}`,
@@ -81,43 +132,40 @@ module.exports = async function handler(req, res) {
     `🕒 <b>Время:</b> ${escapeHtml(lead.timestamp)}`,
   ].filter(Boolean).join('\n');
 
-  try {
-    const tgResponse = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  // Telegram и Sheets шлём параллельно, чтобы уложиться в maxDuration.
+  const sendTelegram = async () => {
+    if (!token || !chatId) return false;
+    const r = await withTimeout(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: message,
-        parse_mode: 'HTML',
-        disable_web_page_preview: true,
-      }),
-    });
+      body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML', disable_web_page_preview: true }),
+    }, 6000);
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || j.ok === false) throw new Error(`Telegram ${r.status} ${j.description || ''}`);
+    return true;
+  };
 
-    const tgResult = await tgResponse.json().catch(() => ({}));
-    if (!tgResponse.ok || tgResult.ok === false) {
-      console.error('Telegram error', tgResult);
-      return res.status(502).json({ ok: false, error: 'Telegram delivery failed' });
-    }
+  const sendSheets = async () => {
+    if (!sheetsWebhook) return false;
+    const payload = process.env.GOOGLE_SHEETS_SECRET ? { ...lead, secret: process.env.GOOGLE_SHEETS_SECRET } : lead;
+    const r = await withTimeout(sheetsWebhook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      redirect: 'follow',
+    }, 6000);
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || j.ok === false) throw new Error(`Sheets ${r.status} ${j.ok === false ? 'rejected' : ''}`);
+    return true;
+  };
 
-    // Optional Google Sheets mirror via Apps Script webhook.
-    const sheetsWebhook = process.env.GOOGLE_SHEETS_WEBHOOK;
-    if (sheetsWebhook) {
-      try {
-        const sheetResponse = await fetch(sheetsWebhook, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(lead),
-        });
-        if (!sheetResponse.ok) console.error('Google Sheets webhook failed', sheetResponse.status);
-      } catch (sheetError) {
-        // Telegram is the primary notification channel; don't lose a valid lead because Sheets is down.
-        console.error('Google Sheets webhook error', sheetError);
-      }
-    }
+  const [tg, sheets] = await Promise.allSettled([sendTelegram(), sendSheets()]);
+  if (tg.status === 'rejected') console.error('Telegram error:', tg.reason?.message || tg.reason);
+  if (sheets.status === 'rejected') console.error('Sheets error:', sheets.reason?.message || sheets.reason);
 
-    return res.status(200).json({ ok: true });
-  } catch (error) {
-    console.error('Lead handler error', error);
-    return res.status(500).json({ ok: false, error: 'Lead delivery failed' });
-  }
+  // Лид считается принятым, если он дошёл хотя бы в один канал.
+  const delivered = (tg.status === 'fulfilled' && tg.value) || (sheets.status === 'fulfilled' && sheets.value);
+  if (!delivered) return res.status(502).json({ ok: false, error: 'Lead delivery failed' });
+
+  return res.status(200).json({ ok: true });
 };

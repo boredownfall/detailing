@@ -28,6 +28,11 @@
   <meta property="og:url" content="https://bronya-auto.ru/" />
   <meta property="og:image" content="https://bronya-auto.ru/assets/cases/exeed-matte-protective-wrap-front.webp" />
   <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="BRONYA AUTO" />
+  <meta property="og:image:width" content="960" />
+  <meta property="og:image:height" content="1280" />
+  <meta property="og:image:alt" content="EXEED после защитной оклейки кузова" />
+  <meta name="twitter:card" content="summary_large_image" />
   <meta name="theme-color" content="#0a0b0d" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -87,6 +92,15 @@
 @media(max-width:900px){#works .works-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}#works .work-card--feature{grid-column:1/-1!important}#works .work-card--feature .work-photo,#works .work-photo--feature{aspect-ratio:16/8!important}}
 @media(max-width:640px){#works .works-grid{grid-template-columns:1fr!important}#works .work-card--feature{grid-column:auto!important}#works .work-photo,#works .work-photo--low,#works .work-photo--mid{height:auto!important;aspect-ratio:3/4!important}#works .work-card--feature .work-photo,#works .work-photo--feature{height:auto!important;aspect-ratio:4/3!important}}
 
+
+/* a11y, focus, motion */
+.skip-link{position:absolute;left:12px;top:-60px;z-index:100;background:var(--accent);color:#0b0c0e;padding:10px 16px;border-radius:12px;font-weight:800;text-decoration:none}
+.skip-link:focus{top:12px}
+a:focus-visible,button:focus-visible,summary:focus-visible,.field input:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:10px}
+.option-card input:focus-visible+span,.check-card input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.consent a{color:var(--accent)}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
   <script type="application/ld+json">
   {
@@ -95,11 +109,14 @@
     "name": "Защитная оклейка автомобиля полиуретановой плёнкой",
     "areaServed": {"@type": "City", "name": "Москва"},
     "serviceType": "Защитная оклейка автомобиля полиуретановой плёнкой",
+    "description": "Защитная оклейка автомобиля полиуретановой плёнкой в Москве: зоны риска, передняя часть, полная оклейка. Расчёт стоимости под вашу модель.",
     "provider": {"@type": "Organization", "name": "BRONYA AUTO", "url": "https://bronya-auto.ru/"}
   }
   </script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Сколько стоит защитная оклейка автомобиля?", "acceptedAnswer": {"@type": "Answer", "text": "Зоны риска обычно находятся в диапазоне 55–75 тыс. ₽, полная оклейка — ориентировочно 230–250 тыс. ₽. Точная стоимость зависит от модели, геометрии кузова, материала и объёма работ. Подробнее о ценах"}}, {"@type": "Question", "name": "Сколько занимает полная оклейка?", "acceptedAnswer": {"@type": "Answer", "text": "Работы занимают от 1 дня. Полная и более сложная оклейка обычно требует до 3–4 дней."}}, {"@type": "Question", "name": "Какие зоны лучше защитить в первую очередь?", "acceptedAnswer": {"@type": "Answer", "text": "Чаще всего начинают с переднего бампера, капота, крыльев, зеркал, фар и других участков, наиболее подверженных дорожному воздействию."}}, {"@type": "Question", "name": "Можно ли оклеить только отдельные элементы?", "acceptedAnswer": {"@type": "Answer", "text": "Да. Можно собрать индивидуальный набор зон — например, только фары, капот, пороги или багажную зону."}}, {"@type": "Question", "name": "Есть ли гарантия?", "acceptedAnswer": {"@type": "Answer", "text": "Гарантия на выполненные работы — 1 год. На плёнку — до 5 лет."}}, {"@type": "Question", "name": "От чего зависит итоговая стоимость?", "acceptedAnswer": {"@type": "Answer", "text": "От модели и размеров автомобиля, сложности геометрии кузова, количества элементов, выбранной плёнки и объёма подготовительных работ."}}]}</script>
 </head>
 <body>
+  <a class="skip-link" href="#main">К содержимому</a>
   <div class="noise"></div>
 
   <header class="header" id="top">
@@ -114,9 +131,9 @@
         <a href="#faq">FAQ</a>
       </nav>
       <button class="btn btn--small js-open-calculator">Рассчитать стоимость</button>
-      <button class="menu-btn" aria-label="Открыть меню" aria-expanded="false">☰</button>
+      <button class="menu-btn" aria-label="Открыть меню" aria-controls="mobileNav" aria-expanded="false">☰</button>
     </div>
-    <div class="mobile-nav" aria-hidden="true">
+    <div class="mobile-nav" id="mobileNav" aria-hidden="true">
       <a href="#packages">Варианты защиты</a>
       <a href="#works">Работы</a>
       <a href="#process">Как это работает</a>
@@ -124,7 +141,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="main">
     <section class="hero section">
       <div class="container hero__grid">
         <div class="hero__copy">
@@ -228,7 +245,7 @@
                 <label class="field"><span>Телефон / WhatsApp</span><input type="tel" name="phone" placeholder="+7 999 123-45-67" autocomplete="tel" /></label>
                 <label class="field"><span>Telegram <em>необязательно</em></span><input type="text" name="telegram" placeholder="@username" /></label>
               </div>
-              <label class="consent"><input type="checkbox" name="consent" value="yes"><span>Согласен на обработку персональных данных</span></label>
+              <label class="consent"><input type="checkbox" name="consent" value="yes"><span>Согласен на <a href="/privacy.html" target="_blank" rel="noopener">обработку персональных данных</a></span></label>
               <div class="form-error" id="formError" role="alert"></div>
             </section>
 
@@ -417,7 +434,7 @@
   <footer class="footer">
     <div class="container footer__grid">
       <div><a class="brand" href="#top"><span class="brand__mark">B</span><span>BRONYA AUTO</span></a><p>Защитная оклейка автомобилей полиуретановой плёнкой в Москве. PPF — профессиональное название материала.</p></div>
-      <div class="footer__links"><a href="#packages">Варианты защиты</a><a href="#works">Работы</a><a href="#faq">FAQ</a><a href="privacy.html">Политика конфиденциальности</a></div>
+      <div class="footer__links"><a href="#packages">Варианты защиты</a><a href="#works">Работы</a><a href="/ceny/">Цены</a><a href="/raboty/">Все работы</a><a href="#faq">FAQ</a><a href="/privacy.html">Политика конфиденциальности</a></div>
       <div class="footer__contacts"><a id="telegramLink" href="#" rel="nofollow">Telegram</a><a id="whatsappLink" href="#" rel="nofollow">WhatsApp</a></div>
     </div>
     <div class="container footer__bottom"><span>© <span id="yearNow"></span> BRONYA AUTO</span><span>Москва</span></div>
@@ -427,6 +444,27 @@
 
   <script>
 (() => {
+  // ====== Настройки ======
+  // Заполните — и ссылки в футере появятся. Пока пусто, они скрыты (раньше вели на "#").
+  const CONFIG = {
+    telegramUrl: '',   // например: 'https://t.me/your_username'
+    whatsappUrl: '',   // например: 'https://wa.me/79991234567'
+    ymId: 113135482
+  };
+
+  const goal = (name, params) => {
+    try { if (typeof ym === 'function') ym(CONFIG.ymId, 'reachGoal', name, params); } catch (_) {}
+  };
+
+  // ====== Контакты в футере ======
+  [['telegramLink', CONFIG.telegramUrl], ['whatsappLink', CONFIG.whatsappUrl]].forEach(([id, url]) => {
+    const a = document.getElementById(id);
+    if (!a) return;
+    if (url) { a.href = url; a.target = '_blank'; a.rel = 'noopener nofollow'; }
+    else a.hidden = true;
+  });
+  const hasMessengers = Boolean(CONFIG.telegramUrl || CONFIG.whatsappUrl);
+
   const form = document.getElementById('leadForm');
   if (!form) return;
   const steps = [...document.querySelectorAll('.quiz-step')];
@@ -439,86 +477,187 @@
   const error = document.getElementById('formError');
   const success = document.getElementById('quizSuccess');
   const quiz = document.getElementById('quiz');
-  let step = 1;
   const total = steps.length;
+  const thisYear = new Date().getFullYear();
+  let step = 1;
+  let started = false;
   totalEl.textContent = total;
 
-  const update = () => {
+  const update = (moveFocus = false) => {
     steps.forEach(s => s.classList.toggle('is-active', Number(s.dataset.step) === step));
     currentEl.textContent = step;
-    progress.style.width = `${(step/total)*100}%`;
+    progress.style.width = `${(step / total) * 100}%`;
     prev.style.visibility = step === 1 ? 'hidden' : 'visible';
     next.classList.toggle('is-hidden', step === total);
     submit.classList.toggle('is-hidden', step !== total);
     error.textContent = '';
+    if (moveFocus) {
+      const h = steps[step - 1].querySelector('h3');
+      if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); }
+    }
   };
 
+  const fail = msg => { error.textContent = msg; return false; };
+
+  const normTelegram = v => v.trim().replace(/^https?:\/\/t\.me\//i, '').replace(/^@/, '');
+  const phoneDigits = v => v.replace(/\D/g, '');
+
   const validStep = () => {
-    error.textContent='';
+    error.textContent = '';
     if (step === 1 && !form.querySelector('input[name="brand"]:checked')) return fail('Выберите марку автомобиля.');
-    if (step === 2 && !form.elements.model.value.trim()) return fail('Укажите модель автомобиля.');
+    if (step === 2) {
+      if (!form.elements.model.value.trim()) return fail('Укажите модель автомобиля.');
+      const y = form.elements.year.value.trim();
+      if (y && (!/^\d{4}$/.test(y) || +y < 1980 || +y > thisYear + 1)) return fail('Проверьте год выпуска или оставьте поле пустым.');
+    }
     if (step === 3 && !form.querySelector('input[name="package"]:checked')) return fail('Выберите вариант защиты.');
     if (step === 4 && !form.querySelector('input[name="timeline"]:checked')) return fail('Укажите, когда планируете оклейку.');
     return true;
   };
-  const fail = msg => { error.textContent = msg; return false; };
 
-  next.addEventListener('click', () => { if(validStep() && step < total){ step++; update(); } });
-  prev.addEventListener('click', () => { if(step > 1){ step--; update(); } });
+  const go = delta => {
+    const target = step + delta;
+    if (target < 1 || target > total) return;
+    if (delta > 0) {
+      if (!validStep()) return;
+      goal('calculator_step_completed', { step });
+    }
+    step = target;
+    update(true);
+  };
+
+  const markStarted = () => {
+    if (started) return;
+    started = true;
+    goal('calculator_started');
+  };
+
+  next.addEventListener('click', () => go(1));
+  prev.addEventListener('click', () => go(-1));
+  form.addEventListener('focusin', markStarted);
+  form.addEventListener('click', markStarted);
 
   form.addEventListener('change', e => {
-    if (e.target.matches('input[type="radio"]') && [1,3,4].includes(step)) setTimeout(()=>{ if(validStep() && step<total){ step++; update(); } },180);
+    if (e.target.matches('input[type="radio"]') && [1, 3, 4].includes(step)) {
+      if (e.target.name === 'brand') goal('car_brand_selected', { brand: e.target.value });
+      if (e.target.name === 'package') goal('protection_package_selected', { package: e.target.value });
+      setTimeout(() => go(1), 180);
+    }
   });
 
-  const params = new URLSearchParams(location.search);
-  const attribution = {};
-  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(k => attribution[k] = params.get(k) || '');
-  attribution.referrer = document.referrer || '';
-  attribution.landing_page = location.href;
+  // Enter на промежуточном шаге = «Продолжить», а не отправка формы с недозаполненными данными.
+  form.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA') return;
+    if (step < total) { e.preventDefault(); go(1); }
+  });
 
+  // Год — только цифры.
+  form.elements.year.addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4); });
+
+  // ====== Атрибуция: UTM / yclid / gclid переживают переход «подстраница → главная» ======
+  const ATTR_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+  const ALL_KEYS = [...ATTR_KEYS, 'yclid', 'gclid'];
+  const params = new URLSearchParams(location.search);
+  let stored = null;
+  try { stored = JSON.parse(sessionStorage.getItem('bronya_attr') || 'null'); } catch (_) {}
+  const hasFresh = ALL_KEYS.some(k => params.get(k));
+  if (hasFresh || !stored) {
+    stored = { u: Object.fromEntries(ALL_KEYS.map(k => [k, params.get(k) || ''])), r: document.referrer || '', l: location.href };
+    try { sessionStorage.setItem('bronya_attr', JSON.stringify(stored)); } catch (_) {}
+  }
+  const attribution = Object.fromEntries(ATTR_KEYS.map(k => [k, (stored.u && stored.u[k]) || '']));
+  attribution.referrer = stored.r || '';
+  attribution.landing_page = stored.l || location.href;
+
+  // ====== Предзаполнение из ссылок вида /?brand=BMW&model=X5#calculator ======
+  const checkRadio = (name, value) => {
+    const el = [...form.querySelectorAll(`input[name="${name}"]`)].find(i => i.value === value);
+    if (el) el.checked = true;
+    return Boolean(el);
+  };
+  const qBrand = params.get('brand'), qModel = (params.get('model') || '').slice(0, 60), qPkg = params.get('package');
+  if (qBrand && checkRadio('brand', qBrand)) {
+    step = 2;
+    if (qModel) { form.elements.model.value = qModel; step = 3; }
+    if (qPkg && checkRadio('package', qPkg)) step = 4;
+  } else if (qPkg && checkRadio('package', qPkg)) {
+    step = 1;
+  }
+
+  // ====== Отправка ======
   form.addEventListener('submit', async e => {
-    e.preventDefault(); error.textContent='';
+    e.preventDefault();
+    error.textContent = '';
+    if (step < total) { go(1); return; }
+
     const phone = form.elements.phone.value.trim();
     const tg = form.elements.telegram.value.trim();
     if (!phone && !tg) return fail('Оставьте телефон/WhatsApp или Telegram.');
+    if (phone) {
+      const d = phoneDigits(phone);
+      if (d.length < 10 || d.length > 15) return fail('Проверьте номер телефона — например, +7 999 123-45-67.');
+    }
+    if (tg && !/^[A-Za-z0-9_]{4,32}$/.test(normTelegram(tg))) return fail('Telegram указывается в виде @username.');
     if (!form.elements.consent.checked) return fail('Нужно согласие на обработку персональных данных.');
-    const fd = new FormData(form);
-    const data = Object.fromEntries(fd.entries());
+
+    const data = Object.fromEntries(new FormData(form).entries());
     data.zones = [];
-    Object.assign(data, attribution, {timestamp:new Date().toISOString()});
-    const webhook = quiz.dataset.webhook;
+    Object.assign(data, attribution, { timestamp: new Date().toISOString() });
+
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 15000);
     try {
       submit.disabled = true;
       submit.textContent = 'Отправляем…';
-      if(!webhook) throw new Error('Webhook is not configured');
-      const response = await fetch(webhook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-      const result = await response.json().catch(()=>({}));
-      if(!response.ok || result.ok === false) throw new Error(result.error || 'Lead delivery failed');
-      if (typeof ym === 'function') {
-  ym(113135482, 'reachGoal', 'lead_success');
-}
-      form.style.display='none';
-      document.querySelector('.quiz__top').style.display='none';
+      const response = await fetch(quiz.dataset.webhook, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        signal: ctrl.signal
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || result.ok === false) throw new Error(result.error || 'Lead delivery failed');
+      goal('lead_success');
+      form.style.display = 'none';
+      document.querySelector('.quiz__top').style.display = 'none';
       success.classList.add('is-active');
-      localStorage.setItem('bronya_auto_last_lead', JSON.stringify(data));
-    } catch(err){
+    } catch (err) {
       console.error(err);
-      fail('Не удалось отправить заявку. Попробуйте ещё раз или напишите в Telegram/WhatsApp.');
+      fail(hasMessengers
+        ? 'Не удалось отправить заявку. Попробуйте ещё раз или напишите нам в Telegram/WhatsApp.'
+        : 'Не удалось отправить заявку. Проверьте соединение и попробуйте ещё раз.');
     } finally {
+      clearTimeout(timer);
       submit.disabled = false;
       submit.textContent = 'Получить расчёт';
     }
   });
 
-  document.getElementById('restartQuiz')?.addEventListener('click',()=>{
-    form.reset(); form.style.display='block'; document.querySelector('.quiz__top').style.display='flex'; success.classList.remove('is-active'); step=1; update();
+  document.getElementById('restartQuiz')?.addEventListener('click', () => {
+    form.reset();
+    form.style.display = 'block';
+    document.querySelector('.quiz__top').style.display = 'flex';
+    success.classList.remove('is-active');
+    step = 1;
+    update();
   });
-  document.querySelectorAll('.js-open-calculator').forEach(btn=>btn.addEventListener('click',()=>document.getElementById('calculator').scrollIntoView({behavior:'smooth'})));
-  document.getElementById('yearNow').textContent = new Date().getFullYear();
+
+  // ====== Навигация ======
+  document.querySelectorAll('.js-open-calculator').forEach(btn =>
+    btn.addEventListener('click', () => document.getElementById('calculator').scrollIntoView({ behavior: 'smooth' })));
+  document.getElementById('yearNow').textContent = thisYear;
+
   const menuBtn = document.querySelector('.menu-btn');
   const mobileNav = document.querySelector('.mobile-nav');
-  menuBtn?.addEventListener('click',()=>{ const open=mobileNav.classList.toggle('is-open'); menuBtn.setAttribute('aria-expanded', String(open)); });
-  mobileNav?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>mobileNav.classList.remove('is-open')));
+  const setMenu = open => {
+    mobileNav.classList.toggle('is-open', open);
+    mobileNav.setAttribute('aria-hidden', String(!open));
+    menuBtn.setAttribute('aria-expanded', String(open));
+  };
+  menuBtn?.addEventListener('click', () => setMenu(!mobileNav.classList.contains('is-open')));
+  mobileNav?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && mobileNav?.classList.contains('is-open')) { setMenu(false); menuBtn.focus(); } });
+
   update();
 })();
 
